@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <title>Listeinnhold List</title>
+</head>
+
+<body>
+    <div id="container"></div>
+</body>
+
+<script>
+
+    let url = "http://taskplanner1.herokuapp.com/listeinnhold";
+    let container = document.getElementById('container');
+    let txtPlanner = document.getElementById('txtPlanner');
+    let plrID = sessionStorage.getItem("plannerid");
+
+    listListeinnhold(); //list listeinnhold at startup
+
+// ------------------------
+async function listListeinnhold() {
+
+    try {
+
+        let logindata = JSON.parse(sessionStorage.getItem("logindata"));
+        let token = logindata.token;
+
+        let cfg = {
+            method: "GET",
+            headers: { "authorization": token }
+        };
+
+        var resp = await fetch(url + "?plannerid=" + plrID, cfg);
+        var data = await resp.json();
+
+        if (resp.status > 202) {
+            throw(data);
+        };
+
+        container.innerHTML = ""; //delete previous content
+
+        for (let value of data){
+            let html = `
+                <h3>${value.description}</h3>
+                <p>stk ${value.amount}</p>
+                <hr>
+            `;
+            let div = document.createElement("div");
+            div.innerHTML = html;
+
+            let delBtn = document.createElement("button");
+            delBtn.innerHTML = "Delete";
+            delBtn.addEventListener('click', function (evt) {
+                deleteListeinnhold(value.id);
+            });
+
+            div.insertBefore(delBtn, div.lastElementChild);
+            container.appendChild(div);
+        }
+    }
+    catch (err) {
+    }
+}
+
+// -------------------
+async function deleteListeinnhold(id) {
+
+    let updata = { listeinnholdID: id };
+    
+    let logindata = JSON.parse(sessionStorage.getItem("logindata"));
+    let token = logindata.token;
+
+    let cfg = {
+        method: "DELETE",
+        headers: {
+            "authorization": token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updata)
+    }
+
+    try {
+        let resp = await fetch(url, cfg);
+        
+        if (resp.status > 202) {
+            throw (data);
+        };
+        
+        listListeinnhold();
+    }
+      
+    catch (err) {
+    }
+}
+
+</script>
+
+</html>

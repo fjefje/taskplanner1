@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">    
+    <title>Listeinnhold Create</title>
+</head>
+
+<body>
+    
+    <input type="text" id="inpDescr" placeholder="Description">
+    <input type="text" id="inpAmount" placeholder="Add info">
+    <br></br>
+    <button id="btnCreate">lag listeinnhold</button>
+    <h3 id="txtResult">Result...</h3>
+
+</body>
+
+<script>
+
+    let inpDescr = document.getElementById('inpDescr');
+    let inpAmount = document.getElementById('inpAmount');
+    let btnCreate = document.getElementById('btnCreate');
+    let txtResult = document.getElementById('txtResult');
+
+    let plrID = sessionStorage.getItem("plannerid");
+
+    btnCreate.addEventListener('click', async function(evt) {
+
+
+    let url = "http://taskplanner1.herokuapp.com/listeinnhold";
+
+    let logindata = JSON.parse(sessionStorage.getItem("logindata"));
+    let token = logindata.token;
+
+    let updata = {
+        descr: inpDescr.value,
+        amount: inpAmount.value,
+        plannerid: plrID
+        
+    }
+
+    let cfg = {
+        method: "POST",
+        headers: {
+            "authorization": token,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(updata)
+    }
+
+
+    try {
+        var resp = await fetch(url, cfg);
+        var data = await resp.json();
+
+        if (resp.status > 202) {
+            throw(data);
+        };
+        
+        txtResult.innerHTML = data.msg + " for " + inpDescr.value;
+    }
+    catch (err) {
+    }
+});
+
+</script>
+
+</html>
+
